@@ -61,8 +61,19 @@ typedef union v4
     {
         f32 x;
         f32 y;
-        f32 z;
-        f32 w;
+        union
+        {
+            struct
+            {
+                f32 z;
+                f32 w;
+            };
+            struct
+            {
+                f32 width;
+                f32 height;
+            };
+        };
     };
     struct
     {
