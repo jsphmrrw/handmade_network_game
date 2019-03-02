@@ -1,4 +1,4 @@
 #define WINDOW_TITLE "Handmade Network Game"
 #define DEFAULT_WINDOW_WIDTH  1280
 #define DEFAULT_WINDOW_HEIGHT 720
-#define PERMANENT_STORAGE_SIZE megabytes(32)
+#define PERMANENT_STORAGE_SIZE Megabytes(32)

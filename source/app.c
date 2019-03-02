@@ -1,7 +1,8 @@
-
-typedef struct App {
+typedef struct App
+{
     f32 delta_t;
-} App;
+}
+App;
 
 global App *app = 0;
 global Platform *platform = 0;
@@ -10,10 +11,13 @@ global Platform *platform = 0;
 #define GREEN_OFFSET 1
 #define BLUE_OFFSET  0
 
-void
-clear_backbuffer() {
-    for(u32 j = 0; j < platform->backbuffer_height; ++j) {
-        for(u32 i = 0; i < platform->backbuffer_width; ++i) {
+internal void
+ClearBackbuffer()
+{
+    for(u32 j = 0; j < platform->backbuffer_height; ++j)
+    {
+        for(u32 i = 0; i < platform->backbuffer_width; ++i)
+        {
             u8 *r = platform->backbuffer + (j*platform->backbuffer_width + i)*3 + RED_OFFSET;
             u8 *g = platform->backbuffer + (j*platform->backbuffer_width + i)*3 + GREEN_OFFSET;
             u8 *b = platform->backbuffer + (j*platform->backbuffer_width + i)*3 + BLUE_OFFSET;
@@ -25,8 +29,9 @@ clear_backbuffer() {
     }
 }
 
-void
-draw_filled_rect(v4 color, v2 position, v2 size) {
+internal void
+DrawFilledRect(v4 color, v2 position, v2 size)
+{
     u8 *backbuffer = platform->backbuffer;
     i32 backbuffer_width = (i32)platform->backbuffer_width;
     i32 backbuffer_height = (i32)platform->backbuffer_height;
@@ -37,16 +42,16 @@ draw_filled_rect(v4 color, v2 position, v2 size) {
     i32 upper_bound_y = lower_bound_y + (i32)size.y;
     i32 pixel_index = 0;
     
-    for(i32 j = lower_bound_y;
-        j <= upper_bound_y;
-        ++j) {
+    for(i32 j = lower_bound_y; j <= upper_bound_y; ++j)
+    {
         
-        if(j >= 0 && j < backbuffer_height) {
-            for(i32 i = lower_bound_x;
-                i <= upper_bound_x;
-                ++i) {
+        if(j >= 0 && j < backbuffer_height)
+        {
+            for(i32 i = lower_bound_x; i <= upper_bound_x; ++i)
+            {
                 
-                if(i >= 0 && i < backbuffer_width) {
+                if(i >= 0 && i < backbuffer_width)
+                {
                     pixel_index = j*backbuffer_width + i;
                     backbuffer[pixel_index*3 + RED_OFFSET]   = (u8)(color.r * 255.f);
                     backbuffer[pixel_index*3 + GREEN_OFFSET] = (u8)(color.g * 255.f);
@@ -57,8 +62,9 @@ draw_filled_rect(v4 color, v2 position, v2 size) {
     }
 }
 
-void
-draw_filled_circle(v4 color, v2 position, f32 radius) {
+internal void
+DrawFilledCircle(v4 color, v2 position, f32 radius)
+{
     u8 *backbuffer = platform->backbuffer;
     i32 backbuffer_width = (i32)platform->backbuffer_width;
     i32 backbuffer_height = (i32)platform->backbuffer_height;
@@ -71,16 +77,16 @@ draw_filled_circle(v4 color, v2 position, f32 radius) {
     
     f32 radius_sq = radius*radius;
     
-    for(i32 j = lower_bound_y;
-        j <= upper_bound_y;
-        ++j) {
+    for(i32 j = lower_bound_y; j <= upper_bound_y; ++j)
+    {
         
-        if(j >= 0 && j < backbuffer_height) {
-            for(i32 i = lower_bound_x;
-                i <= upper_bound_x;
-                ++i) {
+        if(j >= 0 && j < backbuffer_height)
+        {
+            for(i32 i = lower_bound_x; i <= upper_bound_x; ++i)
+            {
                 
-                if(i >= 0 && i < backbuffer_width) {
+                if(i >= 0 && i < backbuffer_width)
+                {
                     
                     v2 pixel_position = {
                         (f32)i,
@@ -91,7 +97,8 @@ draw_filled_circle(v4 color, v2 position, f32 radius) {
                         (position.x - pixel_position.x)*(position.x - pixel_position.x) +
                         (position.y - pixel_position.y)*(position.y - pixel_position.y);
                     
-                    if(distance_sq <= radius_sq) {
+                    if(distance_sq <= radius_sq)
+                    {
                         pixel_index = j*backbuffer_width + i;
                         backbuffer[pixel_index*3 + RED_OFFSET]   = (u8)(color.r * 255.f);
                         backbuffer[pixel_index*3 + GREEN_OFFSET] = (u8)(color.g * 255.f);
@@ -103,8 +110,9 @@ draw_filled_circle(v4 color, v2 position, f32 radius) {
     }
 }
 
-b32
-app_update(Platform *platform_) {
+internal b32
+AppUpdate(Platform *platform_)
+{
     b32 app_should_quit = 0;
     platform = platform_;
     app = platform->permanent_storage;
@@ -115,39 +123,48 @@ app_update(Platform *platform_) {
         local_persist v2 box_velocity = {0};
         
         f32 move_speed = 16.f;
-        if(platform->key_down[KEY_w]) {
+        if(platform->key_down[KEY_w])
+        {
             box_velocity.y += (-move_speed - box_velocity.y) * app->delta_t;
         }
-        if(platform->key_down[KEY_a]) {
+        if(platform->key_down[KEY_a])
+        {
             box_velocity.x += (-move_speed - box_velocity.x) * app->delta_t;
         }
-        if(platform->key_down[KEY_s]) {
+        if(platform->key_down[KEY_s])
+        {
             box_velocity.y += (move_speed - box_velocity.y) * app->delta_t;
         }
-        if(platform->key_down[KEY_d]) {
+        if(platform->key_down[KEY_d])
+        {
             box_velocity.x += (move_speed - box_velocity.x) * app->delta_t;
         }
         
         box_position.x += box_velocity.x;
         box_position.y += box_velocity.y;
         
-        clear_backbuffer();
-        draw_filled_circle(v4(0.8f, 0.6f, 0, 1), box_position, 32);
+        ClearBackbuffer();
+        DrawFilledCircle(v4(0.8f, 0.6f, 0, 1), box_position, 32);
         
         local_persist u32 projectile_count = 0;
-        local_persist struct {
+        local_persist struct
+        {
             v2 position;
             v2 velocity;
             f32 life;
-        } projectiles[1024] = {0};
+        }
+        projectiles[1024] = {0};
         
         local_persist u32 target_count = 0;
-        local_persist struct {
+        local_persist struct
+        {
             v2 position;
             f32 sin_pos;
-        } targets[1024] = {0};
+        }
+        targets[1024] = {0};
         
-        if(platform->left_mouse_pressed) {
+        if(platform->left_mouse_pressed)
+        {
             f32 projectile_speed = 512.f;
             
             v2 velocity = {
@@ -169,11 +186,13 @@ app_update(Platform *platform_) {
             ++projectile_count;
         }
         
-        if(platform->right_mouse_pressed) {
+        if(platform->right_mouse_pressed)
+        {
             targets[target_count++].position = v2(platform->mouse_x, platform->mouse_y);
         }
         
-        for(u32 i = 0; i < target_count;) {
+        for(u32 i = 0; i < target_count;)
+        {
             // NOTE(rjf): Make target go in circle
             {
                 targets[i].sin_pos += app->delta_t;
@@ -183,55 +202,63 @@ app_update(Platform *platform_) {
             
             b32 hit = 0;
             
-            for(u32 j = 0; j < projectile_count;) {
+            for(u32 j = 0; j < projectile_count;)
+            {
                 if(projectiles[j].position.x >= targets[i].position.x - 32.f &&
                    projectiles[j].position.x <= targets[i].position.x + 32.f &&
                    projectiles[j].position.y >= targets[i].position.y - 32.f &&
-                   projectiles[j].position.y <= targets[i].position.y + 32.f) {
-                    if(j != projectile_count-1 &&
-                       projectile_count > 1) {
-                        memory_copy(projectiles+j, projectiles+projectile_count-1,
-                                    sizeof(projectiles[0]));
+                   projectiles[j].position.y <= targets[i].position.y + 32.f)
+                {
+                    if(j != projectile_count-1 && projectile_count > 1)
+                    {
+                        MemoryCopy(projectiles+j, projectiles+projectile_count-1,
+                                   sizeof(projectiles[0]));
                     }
                     --projectile_count;
                     hit = 1;
                     break;
                 }
-                else {
+                else
+                {
                     ++j;
                 }
             }
             
-            if(hit) {
-                if(i != target_count-1 &&
-                   target_count > 1) {
-                    memory_copy(targets+i, targets+target_count-1,
-                                sizeof(targets[0]));
+            if(hit)
+            {
+                if(i != target_count-1 && target_count > 1)
+                {
+                    MemoryCopy(targets+i, targets+target_count-1,
+                               sizeof(targets[0]));
                 }
                 --target_count;
             }
-            else {
-                draw_filled_rect(v4(1, 0, 0, 1),
-                                 v2(targets[i].position.x - 16, targets[i].position.y - 16),
-                                 v2(32, 32));
+            else
+            {
+                DrawFilledRect(v4(1, 0, 0, 1),
+                               v2(targets[i].position.x - 16, targets[i].position.y - 16),
+                               v2(32, 32));
                 ++i;
             }
         }
         
-        for(u32 i = 0; i < projectile_count;) {
+        for(u32 i = 0; i < projectile_count;)
+        {
             projectiles[i].position.x += projectiles[i].velocity.x * app->delta_t;
             projectiles[i].position.y += projectiles[i].velocity.y * app->delta_t;
             projectiles[i].life -= app->delta_t;
-            if(projectiles[i].life <= 0.f) {
-                if(i != projectile_count-1 &&
-                   projectile_count > 1) {
-                    memory_copy(projectiles+i, projectiles+projectile_count-1,
-                                sizeof(projectiles[0]));
+            if(projectiles[i].life <= 0.f)
+            {
+                if(i != projectile_count-1 && projectile_count > 1)
+                {
+                    MemoryCopy(projectiles+i, projectiles+projectile_count-1,
+                               sizeof(projectiles[0]));
                 }
                 --projectile_count;
             }
-            else {
-                draw_filled_circle(v4(1, 1, 1, 1), projectiles[i].position, 4);
+            else
+            {
+                DrawFilledCircle(v4(1, 1, 1, 1), projectiles[i].position, 4);
                 ++i;
             }
         }

@@ -7,44 +7,56 @@
 global Platform global_platform = {0};
 
 LRESULT CALLBACK
-win32_window_procedure(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
+Win32WindowProcedure(HWND window, UINT message, WPARAM w_param, LPARAM l_param)
+{
     LRESULT result = 0;
     
-    if(message == WM_DESTROY || message == WM_QUIT) {
+    if(message == WM_DESTROY || message == WM_QUIT)
+    {
         global_platform.quit = 1;
     }
-    else if(message == WM_KEYDOWN || message == WM_KEYUP) {
+    else if(message == WM_KEYDOWN || message == WM_KEYUP)
+    {
         b32 key_is_down = message == WM_KEYDOWN;
         u32 key_code = w_param;
         u32 key_index = 0;
-        if(key_code >= 'A' && key_code <= 'Z') {
+        if(key_code >= 'A' && key_code <= 'Z')
+        {
             key_index = KEY_a + (key_code - 'A');
         }
         global_platform.key_down[key_index] = key_is_down;
     }
-    else if(message == WM_MOUSEMOVE) {
+    else if(message == WM_MOUSEMOVE)
+    {
         global_platform.mouse_x = (f32)(l_param & 0x0000FFFF);
         global_platform.mouse_y = (f32)((l_param & 0xFFFF0000) >> 16);
     }
-    else if(message == WM_LBUTTONDOWN) {
-        if(!global_platform.left_mouse_down) {
+    else if(message == WM_LBUTTONDOWN)
+    {
+        if(!global_platform.left_mouse_down)
+        {
             global_platform.left_mouse_pressed = 1;
         }
         global_platform.left_mouse_down = 1;
     }
-    else if(message == WM_LBUTTONUP) {
+    else if(message == WM_LBUTTONUP)
+    {
         global_platform.left_mouse_down = 0;
     }
-    else if(message == WM_RBUTTONDOWN) {
-        if(!global_platform.right_mouse_down) {
+    else if(message == WM_RBUTTONDOWN)
+    {
+        if(!global_platform.right_mouse_down)
+        {
             global_platform.right_mouse_pressed = 1;
         }
         global_platform.right_mouse_down = 1;
     }
-    else if(message == WM_RBUTTONUP) {
+    else if(message == WM_RBUTTONUP)
+    {
         global_platform.right_mouse_down = 0;
     }
-    else {
+    else
+    {
         result = DefWindowProc(window, message, w_param, l_param);
     }
     
@@ -53,12 +65,13 @@ win32_window_procedure(HWND window, UINT message, WPARAM w_param, LPARAM l_param
 
 int CALLBACK
 WinMain(HINSTANCE instance, HINSTANCE previousInstance, 
-        LPSTR commandLine, int commandShow) {
+        LPSTR commandLine, int commandShow)
+{
     
     // Create the window class.
     WNDCLASSA window_class = {0};
     window_class.style = CS_HREDRAW | CS_VREDRAW;
-    window_class.lpfnWndProc = win32_window_procedure;
+    window_class.lpfnWndProc = Win32WindowProcedure;
     window_class.hInstance = instance;
     window_class.lpszClassName = "handmade_network_game";
     window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -74,7 +87,8 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
                                 0, 0,
                                 instance, 0);
     
-    if(!window) {
+    if(!window)
+    {
         DWORD error = GetLastError();
         fprintf(stderr, "ERROR: Window creation failed (%i).\n", error);
         goto quit;
@@ -85,15 +99,19 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
     ShowWindow(window, commandShow);
     UpdateWindow(window);
     
-    struct {
+    struct
+    {
         u32 width;
         u32 height;
         u8 *memory;
-        struct {
+        struct
+        {
             BITMAPINFOHEADER bmiHeader;
             void *bmi_colors_pointer;
-        } bitmap_info;
-    } backbuffer = {0};
+        }
+        bitmap_info;
+    }
+    backbuffer = {0};
     
     // NOTE(rjf): Backbuffer initialization
     {
@@ -127,7 +145,8 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
                                                          MEM_COMMIT | MEM_RESERVE,
                                                          PAGE_READWRITE);
         
-        if(!global_platform.permanent_storage) {
+        if(!global_platform.permanent_storage)
+        {
             DWORD error = GetLastError();
             fprintf(stderr, "ERROR: Application memory failure (%i).\n", error);
             goto quit;
@@ -149,7 +168,8 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
     LARGE_INTEGER begin_frame_time_data;
     LARGE_INTEGER end_frame_time_data;
     
-    while(!global_platform.quit) {
+    while(!global_platform.quit)
+    {
         global_platform.last_time = global_platform.current_time;
         global_platform.current_time += 1.f / global_platform.frames_per_second_target;
         i64 desired_frame_time_counts = performance_counter_frequency / global_platform.frames_per_second_target;
@@ -164,13 +184,14 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
         // Process window messages.
         {
             MSG message;
-            while(PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
+            while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
+            {
                 TranslateMessage(&message);
                 DispatchMessage(&message);
             }
         }
         
-        global_platform.quit |= app_update(&global_platform);
+        global_platform.quit |= AppUpdate(&global_platform);
         
         StretchDIBits(window_device_context,
                       0, 0, global_platform.backbuffer_width, global_platform.backbuffer_height,
@@ -193,7 +214,8 @@ WinMain(HINSTANCE instance, HINSTANCE previousInstance,
             
             QueryPerformanceCounter(&begin_wait_time_data);
             
-            while(counts_to_wait > 0) {
+            while(counts_to_wait > 0)
+            {
                 QueryPerformanceCounter(&end_wait_time_data);
                 counts_to_wait -= end_wait_time_data.QuadPart - begin_wait_time_data.QuadPart;
                 begin_wait_time_data = end_wait_time_data;
